@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -74,35 +76,27 @@ public class HDFSInotifySourceConfiguration {
 	
     @Autowired
     private HDFSInotifySourceProperties properties;
+    
+    @Autowired
+    private MessageChannel output;
 
-    private static Log logger = LogFactory.getLog(HDFSInotifySourceConfiguration.class);
-
+    @Autowired
+    private TriggerProperties triggerProperties;
+    
     private volatile long lastTxId = -1L;
     
     private NotificationConfig notificationConfig;
     
     private HdfsAdmin hdfsAdmin;
 
-	@Autowired
-	private TriggerProperties triggerProperties;
+    private static Log logger = LogFactory.getLog(HDFSInotifySourceConfiguration.class);
 
-	@Autowired
-    public void setNotificationConfig() {
-		this.notificationConfig = new NotificationConfig(this.properties.getHdfsPathToWatch(), this.properties.getIgnoreHiddenFiles());
-    }
-	
-    @Autowired
-    protected void setHdfsAdmin() throws IOException, URISyntaxException {
+	@PostConstruct
+	public void postConstruct() {
+        this.notificationConfig = new NotificationConfig(this.properties.getHdfsPathToWatch(), this.properties.getIgnoreHiddenFiles());
         this.hdfsAdmin = new HdfsAdmin(new URI(this.properties.getHdfsUri()), new Configuration());
-    }
-	
-    private MessageChannel output;
+	}
 
-    @Autowired
-    public void SendingBean(MessageChannel output) {
-        this.output = output;
-    }
-    
     @PollableSource
     public void readEvents() {
         try {
