@@ -23,8 +23,8 @@ public class TriggerConstants {
 
 	public static final String DATE_FORMAT = "MM/dd/yy HH:mm:ss";
 
-	public static final String CRON_TRIGGER_OPTION = "cron";
+	public static final String CRON_TRIGGER_OPTION = "trigger.cron";
 
-	public static final String DATE_TRIGGER_OPTION = "date";
+	public static final String DATE_TRIGGER_OPTION = "trigger.date";
 
 }

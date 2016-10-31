@@ -15,12 +15,13 @@
 
 package org.springframework.cloud.stream.app.ftp;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.hibernate.validator.constraints.Range;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.stream.app.file.remote.AbstractRemoteServerProperties;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * FTP {@code SessionFactory} properties.
@@ -39,7 +40,7 @@ public class FtpSessionFactoryProperties extends AbstractRemoteServerProperties 
 	/**
 	 * The client mode to use for the FTP session.
 	 */
-	private ClientMode clientMode = ClientMode.ACTIVE;
+	private ClientMode clientMode = ClientMode.PASSIVE;
 
 	@Range(min = 0, max = 65535)
 	public int getPort() {

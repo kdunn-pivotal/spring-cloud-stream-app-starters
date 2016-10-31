@@ -2,8 +2,9 @@
 == Sinks
 
 :leveloffset: +2
-:app-starters-root:  https://raw.githubusercontent.com/spring-cloud/spring-cloud-stream-app-starters/master
 
+[[spring-cloud-stream-modules-aggregate-counter-sink]]
+include::{app-starters-root}/metrics/spring-cloud-starter-stream-sink-aggregate-counter/README.adoc[tags=ref-doc]
 
 [[spring-cloud-stream-modules-cassandra-sink]]
 include::{app-starters-root}/cassandra/spring-cloud-starter-stream-sink-cassandra/README.adoc[tags=ref-doc]
@@ -29,6 +30,9 @@ include::{app-starters-root}/gpfdist/spring-cloud-starter-stream-sink-gpfdist/RE
 [[spring-cloud-stream-modules-hdfs-sink]]
 include::{app-starters-root}/hdfs/spring-cloud-starter-stream-sink-hdfs/README.adoc[tags=ref-doc]
 
+[[spring-cloud-stream-modules-hdfs-dataset-sink]]
+include::{app-starters-root}/hdfs/spring-cloud-starter-stream-sink-hdfs-dataset/README.adoc[tags=ref-doc]
+
 [[spring-cloud-stream-modules-jdbc-sink]]
 include::{app-starters-root}/jdbc/spring-cloud-starter-stream-sink-jdbc/README.adoc[tags=ref-doc]
 
@@ -44,8 +48,20 @@ include::{app-starters-root}/redis/spring-cloud-starter-stream-sink-redis/README
 [[spring-cloud-stream-modules-router-sink]]
 include::{app-starters-root}/router/spring-cloud-starter-stream-sink-router/README.adoc[tags=ref-doc]
 
-[[spring-cloud-stream-modules-s3-sink]]
-include::{app-starters-root}/s3/spring-cloud-starter-stream-sink-s3/README.adoc[tags=ref-doc]
+[[spring-cloud-stream-modules-aws-s3-sink]]
+include::{app-starters-root}/aws-s3/spring-cloud-starter-stream-sink-s3/README.adoc[tags=ref-doc]
+
+[[spring-cloud-stream-modules-sftp-sink]]
+include::{app-starters-root}/sftp/spring-cloud-starter-stream-sink-sftp/README.adoc[tags=ref-doc]
+
+[[spring-cloud-stream-modules-tasklauncher-cloudfoundry-sink]]
+include::{app-starters-root}/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-cloudfoundry/README.adoc[tags=ref-doc]
+
+[[spring-cloud-stream-modules-tasklauncher-local-sink]]
+include::{app-starters-root}/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-local/README.adoc[tags=ref-doc]
+
+[[spring-cloud-stream-modules-tasklauncher-yarn-sink]]
+include::{app-starters-root}/tasklauncher/spring-cloud-starter-stream-sink-tasklauncher-yarn/README.adoc[tags=ref-doc]
 
 [[spring-cloud-stream-modules-tcp-sink]]
 include::{app-starters-root}/tcp/spring-cloud-starter-stream-sink-tcp/README.adoc[tags=ref-doc]

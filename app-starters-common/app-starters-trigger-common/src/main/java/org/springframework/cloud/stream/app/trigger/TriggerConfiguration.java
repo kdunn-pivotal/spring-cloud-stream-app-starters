@@ -15,14 +15,15 @@
 
 package org.springframework.cloud.stream.app.trigger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
-import org.springframework.cloud.stream.config.SpelExpressionConverterConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.integration.scheduling.PollerMetadata;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
@@ -34,14 +35,15 @@ import org.springframework.scheduling.support.PeriodicTrigger;
  * @author Artem Bilan
  */
 @Configuration
-@Import(SpelExpressionConverterConfiguration.class)
 public class TriggerConfiguration {
+	private static final Log logger = LogFactory.getLog(TriggerConfiguration.class);
 
 	@Autowired
 	TriggerProperties triggerProperties;
 
 	@Bean(name = { "defaultPoller", PollerMetadata.DEFAULT_POLLER })
 	public PollerMetadata defaultPoller(Trigger trigger) {
+		logger.info("Trigger type: " + trigger);
 		PollerMetadata pollerMetadata = new PollerMetadata();
 		pollerMetadata.setTrigger(trigger);
 		// the default is 1 since a source might return
@@ -76,7 +78,7 @@ public class TriggerConfiguration {
 	static class PeriodicTriggerCondition extends NoneNestedConditions {
 
 		PeriodicTriggerCondition() {
-			super(ConfigurationPhase.PARSE_CONFIGURATION);
+			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
 		@ConditionalOnProperty(TriggerConstants.CRON_TRIGGER_OPTION)

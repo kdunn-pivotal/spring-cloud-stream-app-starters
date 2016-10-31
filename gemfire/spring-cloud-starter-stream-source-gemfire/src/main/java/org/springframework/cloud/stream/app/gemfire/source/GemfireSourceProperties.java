@@ -32,14 +32,14 @@ public class GemfireSourceProperties {
 	/**
 	 * SpEL expression to extract fields from a cache event.
 	 */
-	private Expression expression = new SpelExpressionParser().parseExpression
+	private Expression cacheEventExpression = new SpelExpressionParser().parseExpression
 			(DEFAULT_EXPRESSION);
 
 	public Expression getCacheEventExpression() {
-		return expression;
+		return cacheEventExpression;
 	}
 
 	public void setCacheEventExpression(Expression cacheEventExpression) {
-		this.expression = cacheEventExpression;
+		this.cacheEventExpression = cacheEventExpression;
 	}
 }

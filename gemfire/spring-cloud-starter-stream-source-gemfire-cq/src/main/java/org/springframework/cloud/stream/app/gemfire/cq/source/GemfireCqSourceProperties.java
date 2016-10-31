@@ -33,7 +33,7 @@ public class GemfireCqSourceProperties {
 	/**
 	 * SpEL expression to use to extract data from a cq event.
 	 */
-	private Expression expression = new SpelExpressionParser().parseExpression
+	private Expression cqEventExpression = new SpelExpressionParser().parseExpression
 			(DEFAULT_EXPRESSION);
 
 	/**
@@ -51,10 +51,10 @@ public class GemfireCqSourceProperties {
 	}
 
 	public Expression getCqEventExpression() {
-		return expression;
+		return cqEventExpression;
 	}
 
 	public void setCqEventExpression(Expression cqEventExpression) {
-		this.expression = cqEventExpression;
+		this.cqEventExpression = cqEventExpression;
 	}
 }

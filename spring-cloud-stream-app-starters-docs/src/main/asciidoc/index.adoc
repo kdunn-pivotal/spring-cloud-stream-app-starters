@@ -8,6 +8,8 @@ Sabby Anandan; Artem Bilan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayape
 :icons: font
 :hide-uri-scheme:
 
+:app-starters-root:  https://raw.githubusercontent.com/spring-cloud/spring-cloud-stream-app-starters/master
+
 // Since the core projects will be at different release cadences, the following tokens need changed at the time of every release
 :scst-core-version: current-SNAPSHOT
 
