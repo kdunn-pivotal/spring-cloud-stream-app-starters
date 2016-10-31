@@ -70,7 +70,7 @@ import org.apache.hadoop.hdfs.inotify.MissingEventsException;
  */
 @Configuration
 @EnableBinding(Source.class)
-@EnableConfigurationProperties(HdfsInotifySourceConfiguration.class)
+@EnableConfigurationProperties(HdfsInotifySourceProperties.class)
 @Import({TriggerConfiguration.class, TriggerPropertiesMaxMessagesDefaultOne.class})
 public class HdfsInotifySourceConfiguration {
 
