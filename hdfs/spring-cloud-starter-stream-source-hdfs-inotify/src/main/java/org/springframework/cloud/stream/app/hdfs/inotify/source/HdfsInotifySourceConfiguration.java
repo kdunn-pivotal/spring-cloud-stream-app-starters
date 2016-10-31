@@ -106,7 +106,8 @@ public class HdfsInotifySourceConfiguration {
     }
     
     @PollableSource
-    public void readEvents() {
+    public List<String> readEvents() {
+        List<String> events = new ArrayList<String>();
         try {
             DFSInotifyEventInputStream eventStream;
             if (lastTxId == -1L) {
@@ -123,7 +124,8 @@ public class HdfsInotifySourceConfiguration {
                 for (Event e : eventBatch.getEvents()) {
                     if (toProcessEvent(e)) {
                         String thisEvent = e.getEventType().name() + "," + getPath(e);
-                        output.send(MessageBuilder.withPayload(thisEvent).build());
+                        events.add(thisEvent);
+                        //output.send(MessageBuilder.withPayload(thisEvent).build());
                     }
                 }
             }
@@ -136,7 +138,7 @@ public class HdfsInotifySourceConfiguration {
             logger.error("Unable to get notification information. Setting transaction id to -1. This may cause some events to get missed. " +
                     "Please see javadoc for org.apache.hadoop.hdfs.client.HdfsAdmin#getInotifyEventStream: {}", e);
         }
-        return;
+        return events;
     }
 
     private EventBatch getEventBatch(DFSInotifyEventInputStream eventStream) throws IOException, InterruptedException, MissingEventsException {
