@@ -10,6 +10,10 @@
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 
+    <properties>
+        <hadoop.version>2.7.1</hadoop.version>
+    </properties>
+
 	<modules>
 		<module>spring-cloud-starter-stream-sink-hdfs</module>
 		<module>spring-cloud-starter-stream-sink-hdfs-dataset</module>
