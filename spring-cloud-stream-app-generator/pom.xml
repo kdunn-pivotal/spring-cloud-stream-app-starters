@@ -94,6 +94,7 @@
 						</groovy-transform-processor>
 						<hdfs-sink />
 						<hdfs-dataset-sink />
+						<hdfs-inotify-source />
 						<httpclient-processor>
 							<extraTestConfigClass>org.springframework.cloud.stream.app.test.http.HttpClientProcessorTestConfiguration.class</extraTestConfigClass>
 						</httpclient-processor>
