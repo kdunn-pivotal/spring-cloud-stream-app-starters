@@ -73,7 +73,7 @@ import org.apache.hadoop.hdfs.inotify.MissingEventsException;
 @EnableConfigurationProperties(HdfsInotifySourceConfiguration.class)
 @Import({TriggerConfiguration.class, TriggerPropertiesMaxMessagesDefaultOne.class})
 public class HdfsInotifySourceConfiguration {
-	
+
     @Autowired
     private HdfsInotifySourceProperties properties;
 
@@ -85,19 +85,19 @@ public class HdfsInotifySourceConfiguration {
     
     private HdfsAdmin hdfsAdmin;
 
-	@Autowired
-	private TriggerProperties triggerProperties;
+    @Autowired
+    private TriggerProperties triggerProperties;
 
     @PostConstruct
     public void setNotificationConfig() {
-		this.notificationConfig = new NotificationConfig(this.properties.getHdfsPathToWatch(), this.properties.getIgnoreHiddenFiles());
+        this.notificationConfig = new NotificationConfig(this.properties.getHdfsPathToWatch(), this.properties.getIgnoreHiddenFiles());
     }
-	
+
     @PostConstruct
     protected void setHdfsAdmin() throws IOException, URISyntaxException {
         this.hdfsAdmin = new HdfsAdmin(new URI(this.properties.getHdfsUri()), new org.apache.hadoop.conf.Configuration());
     }
-	
+
     private MessageChannel output;
 
     @Autowired
@@ -108,27 +108,27 @@ public class HdfsInotifySourceConfiguration {
     @PollableSource
     public void readEvents() {
         try {
-        	DFSInotifyEventInputStream eventStream;
-        	if (lastTxId == -1L) {
-        		eventStream = hdfsAdmin.getInotifyEventStream();
-        	}
-        	else {
-        		eventStream = hdfsAdmin.getInotifyEventStream(lastTxId);
-        	}
+            DFSInotifyEventInputStream eventStream;
+            if (lastTxId == -1L) {
+                eventStream = hdfsAdmin.getInotifyEventStream();
+            }
+            else {
+                eventStream = hdfsAdmin.getInotifyEventStream(lastTxId);
+            }
             
-        	EventBatch eventBatch = getEventBatch(eventStream);
+            EventBatch eventBatch = getEventBatch(eventStream);
             lastTxId = eventBatch.getTxid();
             
             if (eventBatch != null && eventBatch.getEvents() != null) {
                 for (Event e : eventBatch.getEvents()) {
                     if (toProcessEvent(e)) {
-                    	String thisEvent = e.getEventType().name() + "," + getPath(e);
-                    	output.send(MessageBuilder.withPayload(thisEvent).build());
+                        String thisEvent = e.getEventType().name() + "," + getPath(e);
+                        output.send(MessageBuilder.withPayload(thisEvent).build());
                     }
                 }
             }
         } catch (IOException | InterruptedException e) {
-        	logger.error("Unable to get notification information: {}", e);;
+            logger.error("Unable to get notification information: {}", e);;
         } catch (MissingEventsException e) {
             // set lastTxId to -1 and update state. This may cause events not to be processed. The reason this exception is thrown is described in the
             // org.apache.hadoop.hdfs.client.HdfsAdmin#getInotifyEventStrea API. It suggests tuning a couple parameters if this API is used.
@@ -142,10 +142,10 @@ public class HdfsInotifySourceConfiguration {
     private EventBatch getEventBatch(DFSInotifyEventInputStream eventStream) throws IOException, InterruptedException, MissingEventsException {
         // According to the inotify API we should retry a few times if poll throws an IOException.
         // Please see org.apache.hadoop.hdfs.DFSInotifyEventInputStream#poll for documentation.
-    	
+
         final TimeUnit pollDurationTimeUnit = TimeUnit.SECONDS;
         final long pollDuration = this.properties.getPollDuration();
-    	
+
         int i = 0;
         while (true) {
             try {
@@ -153,10 +153,10 @@ public class HdfsInotifySourceConfiguration {
                 return eventStream.poll(pollDuration, pollDurationTimeUnit);
             } catch (IOException e) {
                 if (i > this.properties.getNumPollRetries()) {
-                	logger.debug("Failed to poll for event batch. Reached max retry times.", e);
+                    logger.debug("Failed to poll for event batch. Reached max retry times.", e);
                     throw e;
                 } else {
-                	logger.debug("Attempt " + i + " failed to poll for event batch. Retrying.");
+                    logger.debug("Attempt " + i + " failed to poll for event batch. Retrying.");
                 }
             }
         }
@@ -193,8 +193,8 @@ public class HdfsInotifySourceConfiguration {
         private final PathFilter pathFilter;
 
         NotificationConfig(String hdfsPathToWatch, boolean ignoreHiddenFiles) {
-        	// read some class members, set a filter
-        	
+        // read some class members, set a filter
+
             final Pattern watchDirectory = Pattern.compile(hdfsPathToWatch);
             pathFilter = new NotificationEventPathFilter(watchDirectory, ignoreHiddenFiles);
         }
@@ -210,26 +210,26 @@ public class HdfsInotifySourceConfiguration {
      * http://stackoverflow.com/questions/29960186/hdfs-file-watcher
      */
     /*
-     public static void main( String[] args ) throws IOException, InterruptedException, MissingEventsException
-	{
-	    HdfsAdmin admin = new HdfsAdmin( URI.create( args[0] ), new org.apache.hadoop.conf.Configuration() );
-	    DFSInotifyEventInputStream eventStream = admin.getInotifyEventStream();
-	    while( true ) {
-	        EventBatch events = eventStream.take();
-	        for( Event event : events.getEvents() ) {
-	            System.out.println( "event type = " + event.getEventType() );
-	            switch( event.getEventType() ) {
-	                case CREATE:
-	                    CreateEvent createEvent = (CreateEvent) event;
-	                    System.out.println( "  path = " + createEvent.getPath() );
-	                    break;
-	                default:
-	                    break;
-	            }
-	        }
-	    }
-	}
-     */
+    public static void main( String[] args ) throws IOException, InterruptedException, MissingEventsException
+    {
+        HdfsAdmin admin = new HdfsAdmin( URI.create( args[0] ), new org.apache.hadoop.conf.Configuration() );
+        DFSInotifyEventInputStream eventStream = admin.getInotifyEventStream();
+        while( true ) {
+            EventBatch events = eventStream.take();
+            for( Event event : events.getEvents() ) {
+                System.out.println( "event type = " + event.getEventType() );
+                switch( event.getEventType() ) {
+                    case CREATE:
+                        CreateEvent createEvent = (CreateEvent) event;
+                        System.out.println( "  path = " + createEvent.getPath() );
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    */
     
 }
 
