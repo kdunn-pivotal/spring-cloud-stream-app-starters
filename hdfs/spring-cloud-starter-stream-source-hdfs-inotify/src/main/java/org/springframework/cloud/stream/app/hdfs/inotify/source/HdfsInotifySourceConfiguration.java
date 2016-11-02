@@ -69,13 +69,11 @@ import org.apache.hadoop.hdfs.inotify.MissingEventsException;
 /**
  * @author Kyle Dunn
  * 
- * This processor polls the notification events provided by the HdfsAdmin API. 
- * Since this uses the HdfsAdmin APIs it is required to run as an HDFS super user. 
+ * Pollable source for HDFS notification events provided by the HdfsAdmin API; must run as an HDFS super user. 
  * Currently there are six types of events (append, close, create, metadata, rename, and unlink). 
- * Please see org.apache.hadoop.hdfs.inotify.Event documentation for full explanations of each event. 
- * This processor will poll for new events based on a defined duration. It is also important to be 
- * aware that this processor must consume all events. This is because the HDFS admin's event notifications 
- * API does not have filtering. 
+ * See org.apache.hadoop.hdfs.inotify.Event documentation for details. *All* new events are returned
+ * from the API call, at an interval based on the pollable source parameters; the event notifications 
+ * API does not implement filtering. A single JMX REST call is also necessary to establish the latest event id.
  */
 @Configuration
 @EnableBinding(Source.class)
@@ -105,13 +103,6 @@ public class HdfsInotifySourceConfiguration {
     @PostConstruct
     protected void setHdfsAdmin() throws IOException, URISyntaxException {
         this.hdfsAdmin = new HdfsAdmin(new URI(this.properties.getHdfsUri()), new org.apache.hadoop.conf.Configuration());
-    }
-
-    private MessageChannel output;
-
-    @Autowired
-    public void SendingBean(MessageChannel output) {
-        this.output = output;
     }
     
     @PollableSource
@@ -162,11 +153,10 @@ public class HdfsInotifySourceConfiguration {
             if (eventBatch != null && eventBatch.getEvents() != null) {
                 for (Event e : eventBatch.getEvents()) {
                     if (toProcessEvent(e)) {
-                        logger.info("Adding event " + e.getEventType().name() + " for " + getPath(e));
-                        logger.info("txid : " + lastTxId);
+                        logger.debug("Adding event " + e.getEventType().name() + " for " + getPath(e));
+                        logger.debug("txid : " + lastTxId);
                         String thisEvent = e.getEventType().name() + "," + getPath(e);
                         return thisEvent;
-                        //output.send(MessageBuilder.withPayload(thisEvent).build());
                     }
                 }
             }
@@ -215,8 +205,6 @@ public class HdfsInotifySourceConfiguration {
         private final PathFilter pathFilter;
 
         NotificationConfig(String hdfsPathToWatch, boolean ignoreHiddenFiles) {
-        // read some class members, set a filter
-
             final Pattern watchDirectory = Pattern.compile(hdfsPathToWatch);
             pathFilter = new NotificationEventPathFilter(watchDirectory, ignoreHiddenFiles);
         }
@@ -225,33 +213,5 @@ public class HdfsInotifySourceConfiguration {
             return pathFilter;
         }
     }
-    
-    /*
-     * Take single events as they become available, rather than in batch mode
-     * http://johnjianfang.blogspot.com/2015/03/hdfs-6634-inotify-in-hdfs.html?m=1
-     * http://stackoverflow.com/questions/29960186/hdfs-file-watcher
-     */
-    /*
-    public static void main( String[] args ) throws IOException, InterruptedException, MissingEventsException
-    {
-        HdfsAdmin admin = new HdfsAdmin( URI.create( args[0] ), new org.apache.hadoop.conf.Configuration() );
-        DFSInotifyEventInputStream eventStream = admin.getInotifyEventStream();
-        while( true ) {
-            EventBatch events = eventStream.take();
-            for( Event event : events.getEvents() ) {
-                System.out.println( "event type = " + event.getEventType() );
-                switch( event.getEventType() ) {
-                    case CREATE:
-                        CreateEvent createEvent = (CreateEvent) event;
-                        System.out.println( "  path = " + createEvent.getPath() );
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-    */
-    
 }
 
