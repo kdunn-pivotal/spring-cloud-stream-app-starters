@@ -31,6 +31,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,6 +53,10 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
@@ -106,25 +115,57 @@ public class HdfsInotifySourceConfiguration {
     }
     
     @PollableSource
-    public List<String> readEvents() {
-        List<String> events = new ArrayList<String>();
+    public String getNextEvent() {
         try {
             DFSInotifyEventInputStream eventStream;
             if (lastTxId == -1L) {
-                eventStream = hdfsAdmin.getInotifyEventStream();
+                final String[] namenodes = this.properties.getNamenodeHttpUris().split(",");
+                for (String n : namenodes) {
+                    final String uri = "http://" + n + "/jmx?qry=Hadoop:service=NameNode,name=FSNamesystem";
+
+                    JSONParser parser = new JSONParser();
+                     
+                    RestTemplate restTemplate = new RestTemplate();
+                    String nsJmx = restTemplate.getForObject(uri, String.class);
+                    //logger.info(nsJmx);
+                    JSONObject nsJson = (JSONObject) parser.parse(nsJmx);
+                    JSONArray jmxBeans = (JSONArray) nsJson.get("beans");
+
+                    for (Object b : jmxBeans) {
+                        JSONObject obj = (JSONObject) b;
+                        lastTxId = (long) obj.get("LastWrittenTransactionId");
+                    }
+
+                    // No need to query the other Namenode if lastTxId is valid
+                    if (lastTxId != -1L) {
+                        break;
+                    }
+                }
+                logger.info("Starting from TxId: " + lastTxId);
             }
-            else {
-                eventStream = hdfsAdmin.getInotifyEventStream(lastTxId);
+            eventStream = hdfsAdmin.getInotifyEventStream(lastTxId);
+    
+            if (eventStream == null) {
+                logger.info("Received a null event stream");
+                return null; 
             }
             
-            EventBatch eventBatch = getEventBatch(eventStream);
+            EventBatch eventBatch = eventStream.take();
+
+            if (eventBatch == null) {
+                logger.info("Received a null event batch");
+                return null;
+            }
+
             lastTxId = eventBatch.getTxid();
             
             if (eventBatch != null && eventBatch.getEvents() != null) {
                 for (Event e : eventBatch.getEvents()) {
                     if (toProcessEvent(e)) {
+                        logger.info("Adding event " + e.getEventType().name() + " for " + getPath(e));
+                        logger.info("txid : " + lastTxId);
                         String thisEvent = e.getEventType().name() + "," + getPath(e);
-                        events.add(thisEvent);
+                        return thisEvent;
                         //output.send(MessageBuilder.withPayload(thisEvent).build());
                     }
                 }
@@ -137,31 +178,10 @@ public class HdfsInotifySourceConfiguration {
             lastTxId = -1L;
             logger.error("Unable to get notification information. Setting transaction id to -1. This may cause some events to get missed. " +
                     "Please see javadoc for org.apache.hadoop.hdfs.client.HdfsAdmin#getInotifyEventStream: {}", e);
+        } catch (ParseException e) {
+            logger.error("Unable to parse JMX response: {}", e);
         }
-        return events;
-    }
-
-    private EventBatch getEventBatch(DFSInotifyEventInputStream eventStream) throws IOException, InterruptedException, MissingEventsException {
-        // According to the inotify API we should retry a few times if poll throws an IOException.
-        // Please see org.apache.hadoop.hdfs.DFSInotifyEventInputStream#poll for documentation.
-
-        final TimeUnit pollDurationTimeUnit = TimeUnit.SECONDS;
-        final long pollDuration = this.properties.getPollDuration();
-
-        int i = 0;
-        while (true) {
-            try {
-                i += 1;
-                return eventStream.poll(pollDuration, pollDurationTimeUnit);
-            } catch (IOException e) {
-                if (i > this.properties.getNumPollRetries()) {
-                    logger.debug("Failed to poll for event batch. Reached max retry times.", e);
-                    throw e;
-                } else {
-                    logger.debug("Attempt " + i + " failed to poll for event batch. Retrying.");
-                }
-            }
-        }
+        return null;
     }
 
     private boolean toProcessEvent(Event event) {

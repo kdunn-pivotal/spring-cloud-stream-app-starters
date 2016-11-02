@@ -28,17 +28,18 @@ public class HdfsInotifySourceProperties {
     /**
      * The HDFS URI 
      */
-    private String hdfsUri = "/";
+    private String hdfsUri = "hdfs://172.16.139.131:8020";
 	
-	/**
-	 * The time before the polling method returns with the next batch of events if they exist.
-	 */
-    private Integer pollDuration = 1;
+    /**
+     * A comma-separated list of namenode HTTP host:port URIs,
+     * used for a JMX query to determine the last transaction id.
+     */
+    private String namenodeHttpUris = "172.16.139.131:50070,127.0.0.2:50070";
 
     /**
-     * The HDFS path to get event notifications for
+     * The HDFS path to get event notifications for, using expression language or regular expressions.
      */
-    private String hdfsPathToWatch = "/";
+    private String hdfsPathToWatch = "/.*";
 
     /**
      * If true and the final component of the path associated with a 
@@ -52,13 +53,6 @@ public class HdfsInotifySourceProperties {
      */
     private String eventTypes = "append,close,create,metadata,rename,unlink";
 
-    /**
-     * According to the HDFS admin API for event polling it is good to retry 
-     * at least a few times. This number defines how many times the poll will 
-     * be retried if it throws an IOException.
-     */
-    private Integer numPollRetries = 3;
-    
     public void setHdfsUri(String u) {
         this.hdfsUri = u;
     }
@@ -67,20 +61,12 @@ public class HdfsInotifySourceProperties {
         return hdfsUri;
     } 
     
-    public void setPollDuration(Integer d) {
-        this.pollDuration = d;
+    public void setNamenodeHttpUris(String u) {
+        this.namenodeHttpUris = u;
     }
 
-    public Integer getPollDuration() {
-        return pollDuration;
-    }
-    
-    public void setNumPollRetries(Integer r) {
-        this.numPollRetries = r;
-    }
-
-    public Integer getNumPollRetries() {
-        return numPollRetries;
+    public String getNamenodeHttpUris() {
+        return namenodeHttpUris;
     }
     
     public void setIgnoreHiddenFiles(boolean i) {
