@@ -28,13 +28,13 @@ public class HdfsInotifySourceProperties {
     /**
      * The HDFS URI 
      */
-    private String hdfsUri = "hdfs://172.16.139.131:8020";
+    private String hdfsUri = "hdfs://127.0.0.1:8020";
 	
     /**
      * A comma-separated list of namenode HTTP host:port URIs,
      * used for a JMX query to determine the last transaction id.
      */
-    private String namenodeHttpUris = "172.16.139.131:50070,127.0.0.2:50070";
+    private String namenodeHttpUris = "127.0.0.1:50070,127.0.0.2:50070";
 
     /**
      * The HDFS path to get event notifications for, using expression language or regular expressions.
