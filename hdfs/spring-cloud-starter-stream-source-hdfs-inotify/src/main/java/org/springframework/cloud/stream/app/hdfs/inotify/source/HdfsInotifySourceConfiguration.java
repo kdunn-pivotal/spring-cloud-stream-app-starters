@@ -19,16 +19,9 @@ package org.springframework.cloud.stream.app.hdfs.inotify.source;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
 
 import org.json.simple.JSONObject;
@@ -49,12 +42,6 @@ import org.springframework.cloud.stream.app.trigger.TriggerPropertiesMaxMessages
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessagingException;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
@@ -75,7 +62,6 @@ import org.apache.hadoop.hdfs.inotify.MissingEventsException;
  * from the API call, at an interval based on the pollable source parameters; the event notifications 
  * API does not implement filtering. A single JMX REST call is also necessary to establish the latest event id.
  */
-@Configuration
 @EnableBinding(Source.class)
 @EnableConfigurationProperties(HdfsInotifySourceProperties.class)
 @Import({TriggerConfiguration.class, TriggerPropertiesMaxMessagesDefaultOne.class})
